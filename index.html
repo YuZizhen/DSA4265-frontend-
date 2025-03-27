@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeek-like Chatbox</title>
+    <title>Chatbox</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -41,6 +41,8 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
         .message {
@@ -48,6 +50,7 @@
             padding: 12px 16px;
             border-radius: 18px;
             line-height: 1.5;
+            white-space: pre-wrap; /* Preserve line breaks and wrap text */
         }
         
         .user-message {
@@ -69,18 +72,34 @@
             padding: 15px;
             border-top: 1px solid #e5e5e6;
             background-color: white;
+            align-items: flex-end;
+        }
+        
+        #input-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e5e5e6;
+            border-radius: 8px;
         }
         
         #user-input {
-            flex: 1;
+            width: 100%;
             padding: 12px 15px;
-            border: 1px solid #e5e5e6;
-            border-radius: 8px;
+            border: none;
             font-size: 16px;
             outline: none;
+            resize: none;
+            min-height: 24px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            font-family: inherit;
         }
         
-        #user-input:focus {
+        #input-wrapper:focus-within {
             border-color: #3b82f6;
         }
         
@@ -93,6 +112,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            height: fit-content;
         }
         
         #send-button:hover {
@@ -122,12 +142,31 @@
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-5px); }
         }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
     </style>
 </head>
 <body>
     <div id="chat-container">
         <div id="chat-header">
-            DeepSeek-like Chat
+            DSA4265 Chatbox
         </div>
         <div id="chat-messages">
             <div class="message bot-message">
@@ -135,7 +174,9 @@
             </div>
         </div>
         <div id="input-container">
-            <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off">
+            <div id="input-wrapper">
+                <textarea id="user-input" placeholder="Type your message..." rows="1"></textarea>
+            </div>
             <button id="send-button">Send</button>
         </div>
     </div>
@@ -145,11 +186,28 @@
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
         
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            
+            // Limit to max height and show scrollbar if needed
+            if (this.scrollHeight > 200) {
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        });
+        
         function addMessage(text, isUser) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
             messageDiv.textContent = text;
             chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        function scrollToBottom() {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
@@ -163,7 +221,7 @@
                 <span class="typing-dot"></span>
             `;
             chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            scrollToBottom();
         }
         
         function hideTypingIndicator() {
@@ -179,6 +237,7 @@
             
             addMessage(text, true);
             userInput.value = '';
+            userInput.style.height = 'auto'; // Reset textarea height
             
             // Show typing indicator
             showTypingIndicator();
@@ -199,11 +258,15 @@
         }
         
         sendButton.addEventListener('click', processUserInput);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 processUserInput();
             }
         });
+        
+        // Initial scroll to bottom
+        scrollToBottom();
     </script>
 </body>
 </html>
