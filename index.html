@@ -122,8 +122,11 @@
         }
         
         .typing-indicator {
-            display: inline-block;
-            padding-left: 15px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 4px;
+            height: 30px; /* Fixed height for consistent alignment */
         }
         
         .typing-dot {
@@ -170,9 +173,7 @@
             DSA4265 Chatbot
         </div>
         <div id="chat-messages">
-            <div class="message bot-message">
-                Hello! I'm your AI assistant. How can I help you today?
-            </div>
+            <div class="message bot-message">Hello! I'm your AI assistant. How can I help you today?</div>
         </div>
         <div id="input-container">
             <div id="input-wrapper">
