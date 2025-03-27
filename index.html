@@ -230,7 +230,26 @@
             }
         }
         
-        function processUserInput() {
+    
+        async function getBotResponse(userMessage) {
+            try {
+                // Replace with your Render/Railway URL
+                const API_URL = 'https://dsa4265-frontend.onrender.com/chat';
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: userMessage })
+                });
+                
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                return "⚠️ Error: Backend offline. Try again later.";
+            }
+        }
+
+        async function processUserInput() {
             const text = userInput.value.trim();
             if (text === '') return;
             
@@ -240,18 +259,14 @@
             
             showTypingIndicator();
             
-            setTimeout(() => {
+            try {
+                const botResponse = await getBotResponse(text);
                 hideTypingIndicator();
-                const responses = [
-                    "I understand you're asking about: " + text,
-                    "That's an interesting point about " + text,
-                    "Let me think about " + text,
-                    "I'm analyzing your question: " + text,
-                    "Thanks for sharing: " + text
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage(randomResponse, false);
-            }, 1000 + Math.random() * 2000);
+                addMessage(botResponse, false);
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage("Sorry, something went wrong.", false);
+            }
         }
         
         sendButton.addEventListener('click', processUserInput);
